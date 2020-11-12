@@ -6,7 +6,7 @@
 /*   By: bmerchin <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/10 07:30:11 by bmerchin          #+#    #+#             */
-/*   Updated: 2020/11/12 13:46:56 by bmerchin         ###   ########.fr       */
+/*   Updated: 2020/11/12 22:04:29 by bmerchin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,15 +141,6 @@ char	*ft_itoa(int n)
 	return (str);
 }
 
-void	ft_put_d(int a)
-{
-	char *str;
-
-	str = ft_itoa(a);
-	ft_putstr(str);
-	free(str);
-}
-
 void	ft_put_hex(int nbr)
 {
 	char *base;
@@ -177,15 +168,75 @@ void	hq_string(t_struct *data)
 		data->len = data->prec_len;
 	else
 		data->len = ft_strlen(data->s);
-	while (data->width && i < data->width_len - data->len)
+	while (data->width && i < data->width_len - data->len && !data->f_neg)
 	{
 		ft_putchar(data->f_zero);
 		i++;
 	}
 	while (j < data->len)
 		ft_putchar(data->s[j++]);
-//	filler_end(data); //remplis de ' ' pour convenir a la width (flag '-')
+	while (data->width && i < data->width_len - data->len && data->f_neg)
+	{
+		ft_putchar(data->f_zero);
+		i++;
+	}
 }
+/*
+void	ft_put_d(int a)
+{
+	char *str;
+
+	str = ft_itoa(a);
+	ft_putstr(str);
+	free(str);
+}
+*/
+void	hq_int(t_struct *data)
+{
+	int i;
+	int j;
+	int k;
+
+	i = 0;
+	j = 0;
+	k = 0;
+	data->s = ft_itoa(va_arg(data->args, int));
+	if (data->prec && ft_strlen(data->s) < data->prec_len)
+		data->len = data->prec_len;
+	else
+		data->len = ft_strlen(data->s);
+	if (data->prec && data->width && data->prec_len < data->width_len && ft_strlen(data->s) <= data->prec_len)
+		i++;
+	ft_putstr(ft_itoa(data->width_len));
+	ft_putchar('\n');
+	ft_putstr(ft_itoa(i));	
+	ft_putchar('\n');
+	while (data->width && i < data->width_len - data->len && !data->f_neg)
+	{
+		ft_putchar(data->f_zero);
+		i++;
+	}
+	if (data->s[j] == '-')
+	{
+		ft_putchar('-');
+		j++;
+		k = -1;
+	}
+	while (data->prec && k < data->prec_len - ft_strlen(data->s))
+	{
+		ft_putchar('0');
+		k++;
+	}
+	while (j < ft_strlen(data->s))
+		ft_putchar(data->s[j++]);
+	while (data->width && i < data->width_len - data->len && data->f_neg)
+	{
+		ft_putchar(data->f_zero);
+		i++;
+	}
+	free(data->s);
+}
+
 
 void	init_struct(t_struct *data)
 {
@@ -201,33 +252,61 @@ void	init_struct(t_struct *data)
 void	parsor_width(t_struct *data)
 {
 	data->width = 1;
-	data->width_len = ft_atoi(data->str + data->i);
-	while (data->str[data->i] >= '0' && data->str[data->i] <= '9')
+	if (data->str[data->i] == '*')
+	{	
+		data->width_len = va_arg(data->args, int);
 		data->i++;
+	}
+	else
+	{
+		data->width_len = ft_atoi(data->str + data->i);
+		while (data->str[data->i] >= '0' && data->str[data->i] <= '9')
+			data->i++;
+	}
 }
 
 void	parsor_prec(t_struct *data)
 {
 	data->prec = 1;
 	data->i++;
-	data->prec_len = ft_atoi(data->str + data->i);
-	while (data->str[data->i] >= '0' && data->str[data->i] <= '9')
+	if (data->str[data->i] == '*')
+	{	
+		data->prec_len = va_arg(data->args, int);
 		data->i++;
+	}
+	else
+	{
+
+		data->prec_len = ft_atoi(data->str + data->i);
+		while (data->str[data->i] >= '0' && data->str[data->i] <= '9')
+			data->i++;
+	}
 }
 
 void	parsor(t_struct *data)
 {
 	init_struct(data);
 	data->i++;
-	if (data->str[data->i] >= '1' && data->str[data->i] <= '9')
+	while (data->str[data->i] == '0' || data->str[data->i] == '-')
+	{
+		if (data->str[data->i] == '0')
+			data->f_zero = '0';
+		else
+			data->f_neg = 1;
+		data->i++;
+	}
+	if ((data->str[data->i] >= '1' && data->str[data->i] <= '9') ||
+	data->str[data->i] == '*')
 		parsor_width(data);
 	if (data->str[data->i] == '.')
 		parsor_prec(data);
-	if (data->str[data->i] == 'd')
+/*	if (data->str[data->i] == 'd')
 	{
 		data->num = va_arg(data->args, int);
 		ft_put_d(data->num);
-	}
+	}*/
+	if (data->str[data->i] == 'd')
+		hq_int(data);
 	if (data->str[data->i] == 's')
 		hq_string(data);
 	if (data->str[data->i] == 'x')
@@ -235,15 +314,6 @@ void	parsor(t_struct *data)
 		data->num = va_arg(data->args, int);
 		ft_put_hex(data->num);
 	}
-/*	ft_putstr("\n--------\n");
-	ft_putstr(ft_itoa(data->width));
-	ft_putstr("\n--------\n");
-	ft_putstr(ft_itoa(data->width_len));
-	ft_putstr("\n--------\n");
-	ft_putstr(ft_itoa(data->prec));
-	ft_putstr("\n--------\n");
-	ft_putstr(ft_itoa(data->prec_len));
-	ft_putstr("\n--------\n");*/
 	data->i++;
 }
 
@@ -272,9 +342,10 @@ int		ft_printf(const char *str, ...)
 int		main(int ac, char **av)
 {
 	(void)ac;
-	ft_printf("%d oui %x yes %10.3s\n", atoi(av[1]), atoi(av[2]), av[3]);
-	printf("-----------------------\n");
-	printf("%d oui %x yes %10.3s\n", atoi(av[1]), atoi(av[2]), av[3]);	
+	ft_printf(/*"%.2d oui %x yes %-10.*s\n"*/av[4], atoi(av[1]), atoi(av[2]), 3, av[3]);
+	printf("\n-----------------------\n");
+	printf(/*"%.2d oui %x yes %-10.*s\n"*/av[4], atoi(av[1]), atoi(av[2]), 3, av[3]);
+	printf("\n");
 /*	printf("-----------------------\n");
 	printf("%1d-----%.3d-----%.5d\n", atoi(av[1]), atoi(av[2]), atoi(av[3]));
 	printf("-----------------------\n");
