@@ -6,7 +6,7 @@
 /*   By: bmerchin <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/10 07:30:11 by bmerchin          #+#    #+#             */
-/*   Updated: 2020/11/11 06:23:37 by bmerchin         ###   ########.fr       */
+/*   Updated: 2020/11/12 13:46:56 by bmerchin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,9 @@ typedef struct	s_struct
 	int		num;
 	char	*s;
 	char	*str;
+	int		len;
 	int		f_neg;
-	int		f_zero;
-	int		f_neg;
+	char	f_zero;
 	int		width;
 	int		width_len;
 	int		prec;
@@ -51,7 +51,45 @@ void	ft_putstr(char *str)
 	}
 }
 
-int		ft_len(long int nbr)
+int		ft_atoi(char *str)
+{
+	int		i;
+	int		sign;
+	long	nbr;
+
+	i = 0;
+	nbr = 0;
+	sign = 1;
+/*	while (str[i] && ((str[i] >= 9 && str[i] <= 13) || str[i] == ' '))
+		i++;
+	if (str[i] == '+' || str[i] == '-')
+	{
+		if (str[i] == '-')
+			sign = -1;
+		i++;
+	}*/
+	while (str[i] >= '0' && str[i] <= '9')
+	{
+/*		if (sign == 1 && nbr > 922337203685477580)
+			return (-1);
+		else if (nbr > 922337203685477580)
+			return (0);*/
+		nbr = nbr * 10 + str[i++] - '0';
+	}
+	return (nbr * sign);
+}
+
+int		ft_strlen(const char *s)
+{
+	int i;
+
+	i = 0;
+	while (s[i])
+		i++;
+	return (i);
+}
+
+int		ft_intlen(long int nbr)
 {
 	int i;
 
@@ -94,16 +132,16 @@ char	*ft_itoa(int n)
 	}
 	else
 		nbr = n;
-	if (!(str = malloc(sizeof(char) * (ft_len(nbr) + sign + 1))))
+	if (!(str = malloc(sizeof(char) * (ft_intlen(nbr) + sign + 1))))
 		return (NULL);
 	if (sign == 1)
 		str[0] = '-';
-	ft_itoa_fill(str + sign, nbr, ft_len(nbr));
-	str[ft_len(nbr) + sign] = '\0';
+	ft_itoa_fill(str + sign, nbr, ft_intlen(nbr));
+	str[ft_intlen(nbr) + sign] = '\0';
 	return (str);
 }
 
-void ft_put_d(int a)
+void	ft_put_d(int a)
 {
 	char *str;
 
@@ -112,7 +150,7 @@ void ft_put_d(int a)
 	free(str);
 }
 
-void ft_put_hex(int nbr)
+void	ft_put_hex(int nbr)
 {
 	char *base;
 	long nb = (long)nbr;
@@ -127,33 +165,94 @@ void ft_put_hex(int nbr)
 	ft_putchar(base[nb % 16]);
 }
 
+void	hq_string(t_struct *data)
+{
+	int i;
+	int j;
+
+	i = 0;
+	j = 0;
+	data->s = va_arg(data->args, char *);
+	if (data->prec && ft_strlen(data->s) > data->prec_len)
+		data->len = data->prec_len;
+	else
+		data->len = ft_strlen(data->s);
+	while (data->width && i < data->width_len - data->len)
+	{
+		ft_putchar(data->f_zero);
+		i++;
+	}
+	while (j < data->len)
+		ft_putchar(data->s[j++]);
+//	filler_end(data); //remplis de ' ' pour convenir a la width (flag '-')
+}
+
+void	init_struct(t_struct *data)
+{
+	data->len = 0;
+	data->f_neg = 0;
+	data->f_zero = ' ';
+	data->width = 0;
+	data->width_len = 0;
+	data->prec = 0;
+	data->prec_len = 0;
+}
+
+void	parsor_width(t_struct *data)
+{
+	data->width = 1;
+	data->width_len = ft_atoi(data->str + data->i);
+	while (data->str[data->i] >= '0' && data->str[data->i] <= '9')
+		data->i++;
+}
+
+void	parsor_prec(t_struct *data)
+{
+	data->prec = 1;
+	data->i++;
+	data->prec_len = ft_atoi(data->str + data->i);
+	while (data->str[data->i] >= '0' && data->str[data->i] <= '9')
+		data->i++;
+}
+
 void	parsor(t_struct *data)
 {
+	init_struct(data);
 	data->i++;
+	if (data->str[data->i] >= '1' && data->str[data->i] <= '9')
+		parsor_width(data);
+	if (data->str[data->i] == '.')
+		parsor_prec(data);
 	if (data->str[data->i] == 'd')
 	{
 		data->num = va_arg(data->args, int);
 		ft_put_d(data->num);
 	}
 	if (data->str[data->i] == 's')
-	{
-		data->s = va_arg(data->args, char *);
-		ft_putstr(data->s);
-	}
+		hq_string(data);
 	if (data->str[data->i] == 'x')
 	{
 		data->num = va_arg(data->args, int);
 		ft_put_hex(data->num);
 	}
+/*	ft_putstr("\n--------\n");
+	ft_putstr(ft_itoa(data->width));
+	ft_putstr("\n--------\n");
+	ft_putstr(ft_itoa(data->width_len));
+	ft_putstr("\n--------\n");
+	ft_putstr(ft_itoa(data->prec));
+	ft_putstr("\n--------\n");
+	ft_putstr(ft_itoa(data->prec_len));
+	ft_putstr("\n--------\n");*/
 	data->i++;
 }
 
-int ft_printf(const char *str, ...)
+int		ft_printf(const char *str, ...)
 {
 	t_struct data;
 	
 	data.i = 0;
-	data.ret = 1;
+	data.ret = 0;
 	data.str = (char *)str;
 	va_start(data.args, str);
 	while (str[data.i])
@@ -170,16 +269,16 @@ int ft_printf(const char *str, ...)
 	return (data.ret);
 }
 
-int main(int ac, char **av)
+int		main(int ac, char **av)
 {
 	(void)ac;
-	ft_printf("%d oui %x yes %s\n", atoi(av[1]), atoi(av[2]), av[3]);
+	ft_printf("%d oui %x yes %10.3s\n", atoi(av[1]), atoi(av[2]), av[3]);
 	printf("-----------------------\n");
-	printf("%d oui %x yes %s\n", atoi(av[1]), atoi(av[2]), av[3]);	
+	printf("%d oui %x yes %10.3s\n", atoi(av[1]), atoi(av[2]), av[3]);	
 /*	printf("-----------------------\n");
 	printf("%1d-----%.3d-----%.5d\n", atoi(av[1]), atoi(av[2]), atoi(av[3]));
 	printf("-----------------------\n");
-	printf("%1s-----%.3s-----%.5s\n", av[1], av[2], av[3]);*/
+	printf("%5.s-----%.s-----%.5s\n", av[1], av[2], av[3]);*/
 	return (0);
 }
 
