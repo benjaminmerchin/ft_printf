@@ -6,7 +6,7 @@
 /*   By: bmerchin <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/10 07:30:11 by bmerchin          #+#    #+#             */
-/*   Updated: 2020/11/14 09:11:49 by bmerchin         ###   ########.fr       */
+/*   Updated: 2020/11/14 21:57:58 by bmerchin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ typedef struct	s_struct
 	int		num;
 	char	*s;
 	char	*str;
+	unsigned long p;
 	int		len;
 	int		f_neg;
 	char	f_zero;
@@ -141,30 +142,43 @@ char	*ft_itoa(int n)
 	return (str);
 }
 
-void	ft_put_hex(int nbr)
+void	ft_put_hex(int nbr, t_struct *data)
 {
 	char *base;
 	long nb = (long)nbr;
 
-	base = "0123456789abcdef";
+	if (data->str[data->i] == 'x')
+		base = "0123456789abcdef";
+	else
+		base = "0123456789ABCDEF";
 	if (nb < 0)
 	{
 		nb = 4294967296 + nb;
 	}
 	if (nb >= 16)
-		ft_put_hex(nb / 16);
+		ft_put_hex(nb / 16, data);
 	ft_putchar(base[nb % 16]);
 }
 
-void	hq_string(t_struct *data)
+void	ft_len_hex(int nbr, t_struct *data)
+{
+	long nb = (long)nbr;
+
+	if (nb < 0)
+		nb = 4294967296 + nb;
+	if (nb >= 16)
+		ft_len_hex(nb / 16, data);
+	data->len++;
+}
+
+void	shq_s_c(t_struct *data)
 {
 	int i;
 	int j;
 
 	i = 0;
 	j = 0;
-	data->s = va_arg(data->args, char *);
-	if (data->s == NULL)
+	if (data->s == NULL && data->str[data->i] == 's')
 		data->s = "(null)";
 	if (data->prec_len < 0)
 		data->prec_len = ft_strlen(data->s);
@@ -185,16 +199,22 @@ void	hq_string(t_struct *data)
 		i++;
 	}
 }
-/*
-void	ft_put_d(int a)
-{
-	char *str;
 
-	str = ft_itoa(a);
-	ft_putstr(str);
-	free(str);
+void	hq_s_c(t_struct *data)
+{
+	char c[2];
+	
+	if (data->str[data->i] == 's')
+		data->s = va_arg(data->args, char *);
+	if (data->str[data->i] == 'c')
+	{
+		c[0] = va_arg(data->args, int);
+		c[1] = '\0';
+		data->s = c;
+	}
+	shq_s_c(data);
 }
-*/
+
 void	hq_int(t_struct *data)
 {
 	int i;
@@ -254,6 +274,87 @@ void	hq_int(t_struct *data)
 	free(data->s);
 }
 
+void	hq_hex(t_struct *data)
+{
+	int i;
+	int j;
+
+	i = 0;
+	j = 0;
+	data->num = va_arg(data->args, int);
+	ft_len_hex(data->num, data);
+	while (!data->f_neg && j < data->width_len - data->prec_len && j < data->width_len - data->len)
+	{
+		if (data->f_zero != '0' || data->prec)
+			ft_putchar(' ');
+		else
+			ft_putchar('0');
+		j++;
+	}
+	while (i < data->prec_len - data->len)
+	{
+		ft_putchar('0');
+		i++;
+	}
+	if (data->num == 0 && data->prec && data->prec_len == 0)
+	{
+		if (data->width_len > 0)
+			ft_putchar(' ');
+	}
+	else
+		ft_put_hex(data->num, data);
+	while (data->f_neg && j < data->width_len - data->prec_len && j < data->width_len - data->len)
+	{
+		ft_putchar(' ');
+		j++;
+	}
+}
+
+void	ft_put_addr(unsigned long nbr)
+{
+	char *base;
+
+	base = "0123456789abcdef";
+	if (nbr >= 16)
+		ft_put_addr(nbr / 16);
+	ft_putchar(base[nbr % 16]);
+}
+
+void	ft_len_addr(unsigned long nb, t_struct *data)
+{
+	if (nb >= 16)
+		ft_len_addr(nb / 16, data);
+	data->len++;
+}
+
+void	hq_pointer(t_struct *data)
+{
+	int i;
+	int j;
+
+	i = 0;
+	j = 0;
+	data->p = (unsigned long)va_arg(data->args, unsigned long);	
+	ft_len_addr(data->p, data);
+	data->len += 2;
+	while (!data->f_neg && i < data->width_len - data->len)
+	{
+		ft_putchar(' ');
+		i++;
+	}
+	ft_putstr("0x");
+	while (data->prec && j < data->prec_len - data->len + 2)
+	{
+		ft_putchar('0');
+		j++;
+	}
+	ft_put_addr(data->p);
+	while (data->f_neg && i < data->width_len - data->len)
+	{
+		ft_putchar(' ');
+		i++;
+	}
+}
 
 void	init_struct(t_struct *data)
 {
@@ -317,15 +418,14 @@ void	parsor(t_struct *data)
 		parsor_width(data);
 	if (data->str[data->i] == '.')
 		parsor_prec(data);
-	if (data->str[data->i] == 'd')
+	if (data->str[data->i] == 'd' || data->str[data->i] == 'i' || data->str[data->i] == 'u')
 		hq_int(data);
-	if (data->str[data->i] == 's')
-		hq_string(data);
-	if (data->str[data->i] == 'x')
-	{
-		data->num = va_arg(data->args, int);
-		ft_put_hex(data->num);
-	}
+	if (data->str[data->i] == 's' || data->str[data->i] == 'c')
+		hq_s_c(data);
+	if (data->str[data->i] == 'x' || data->str[data->i] == 'X')
+		hq_hex(data);
+	if (data->str[data->i] == 'p')
+		hq_pointer(data);
 	data->i++;
 }
 
@@ -364,8 +464,8 @@ int		main(int ac, char **av)
 	printf("%5.s-----%.s-----%.5s\n", av[1], av[2], av[3]);
 	ft_printf("%d\n", 1);
 	return (0);
-}*/
-
+}
+*/
 // "%.2d oui %x yes %-10.*s\n"
 
 /*
