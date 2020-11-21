@@ -6,7 +6,7 @@
 /*   By: bmerchin <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/10 07:30:11 by bmerchin          #+#    #+#             */
-/*   Updated: 2020/11/14 21:57:58 by bmerchin         ###   ########.fr       */
+/*   Updated: 2020/11/21 14:24:24 by bmerchin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,6 +212,12 @@ void	hq_s_c(t_struct *data)
 		c[1] = '\0';
 		data->s = c;
 	}
+	if (data->str[data->i] == '%')
+	{
+		c[0] = '%';
+		c[1] = '\0';
+		data->s = c;
+	}
 	shq_s_c(data);
 }
 
@@ -334,7 +340,7 @@ void	hq_pointer(t_struct *data)
 
 	i = 0;
 	j = 0;
-	data->p = (unsigned long)va_arg(data->args, unsigned long);	
+	data->p = va_arg(data->args, unsigned long);	
 	ft_len_addr(data->p, data);
 	data->len += 2;
 	while (!data->f_neg && i < data->width_len - data->len)
@@ -400,11 +406,26 @@ void	parsor_prec(t_struct *data)
 			data->i++;
 	}
 }
-
+/*
+int		security(t_struct *data)
+{
+	char a;
+	
+	a = data->str[data->i];
+	if (a == '-' || a == '*' || a == '.' || a == 'd' || a == 'i' || a == 'u' || a == 's' || a == 'c' || a == 'x' || a == 'X' || a == 'p')
+		return (0);
+	if (a >= '0' && a <= '9')
+		return (0);
+	ft_putchar(data->str[data->i - 1]);
+	return (1);
+}
+*/
 void	parsor(t_struct *data)
 {
 	init_struct(data);
 	data->i++;
+/*	if (security(data) == 1)
+		return ;*/
 	while (data->str[data->i] == '0' || data->str[data->i] == '-')
 	{
 		if (data->str[data->i] == '0')
@@ -420,7 +441,7 @@ void	parsor(t_struct *data)
 		parsor_prec(data);
 	if (data->str[data->i] == 'd' || data->str[data->i] == 'i' || data->str[data->i] == 'u')
 		hq_int(data);
-	if (data->str[data->i] == 's' || data->str[data->i] == 'c')
+	if (data->str[data->i] == 's' || data->str[data->i] == 'c' || data->str[data->i] == '%')
 		hq_s_c(data);
 	if (data->str[data->i] == 'x' || data->str[data->i] == 'X')
 		hq_hex(data);
