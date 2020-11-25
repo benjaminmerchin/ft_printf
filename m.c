@@ -14,10 +14,21 @@ int		main(int ac, char **av)
 
 	a = 10;
 	(void)ac;
-	ft_printf(av[4], atoi(av[1]), av[2], &a + 10);
+	(void)av;
+	ft_printf("%d", 5);
+	printf("\n-----------------------\n");
+	printf("%d", 5);
+	printf("\n");
+
+
+
+/*	ft_printf(av[4], atoi(av[1]), av[2], &a + 10);
 	printf("\n-----------------------\n");
 	printf(av[4], atoi(av[1]), av[2], &a + 10);
-	printf("\n");
+	printf("\n");*/
+
+
+
 /*	printf("-----------------------\n");
 	printf("%1d-----%.3d-----%.5d\n", atoi(av[1]), atoi(av[2]), atoi(av[3]));
 	printf("-----------------------\n");
@@ -25,3 +36,6 @@ int		main(int ac, char **av)
 	ft_printf("%d\n", 1);*/
 	return (0);
 }
+
+
+//gcc -Wall -Wextra -Werror -fsanitize=address ft_printf.c m.c && ./a.out 4919 haha 1234 "%-03% %d oui %s yes %.10p" | cat -e
