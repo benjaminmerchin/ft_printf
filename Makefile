@@ -1,9 +1,8 @@
 NAME	=	libftprintf.a
 CC		=	gcc
-OBJ		=	main.c
+OBJ		=	ft_printf.c
 COMP 	=	$(OBJ:.c=.o)
 CFLAGS	=	-Wall -Wextra -Werror
-HEADERS	=	includes
 
 all: $(NAME)
 
@@ -11,7 +10,7 @@ $(NAME): $(COMP)
 	ar rc $(NAME) $(COMP)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $^ -o $@ -I $(HEADERS)
+	$(CC) $(CFLAGS) -c $^ -o $@
 
 clean:
 	rm -f $(COMP)

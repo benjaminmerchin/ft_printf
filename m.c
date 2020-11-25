@@ -14,9 +14,9 @@ int		main(int ac, char **av)
 
 	a = 10;
 	(void)ac;
-	ft_printf(av[4], atoi(av[1]), atoi(av[2]), &a + 10);
+	ft_printf(av[4], atoi(av[1]), av[2], &a + 10);
 	printf("\n-----------------------\n");
-	printf(av[4], atoi(av[1]), atoi(av[2]), &a + 10);
+	printf(av[4], atoi(av[1]), av[2], &a + 10);
 	printf("\n");
 /*	printf("-----------------------\n");
 	printf("%1d-----%.3d-----%.5d\n", atoi(av[1]), atoi(av[2]), atoi(av[3]));
