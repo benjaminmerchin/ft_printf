@@ -1,6 +1,6 @@
 NAME	=	libftprintf.a
 CC		=	gcc
-OBJ		=	ft_printf.c
+OBJ		=	ft_printf.c hex.c itoa.c string.c int.c pointer.c utils.c
 COMP 	=	$(OBJ:.c=.o)
 CFLAGS	=	-Wall -Wextra -Werror
 

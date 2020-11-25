@@ -6,7 +6,7 @@
 /*   By: bmerchin <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/25 05:35:48 by bmerchin          #+#    #+#             */
-/*   Updated: 2020/11/25 05:36:30 by bmerchin         ###   ########.fr       */
+/*   Updated: 2020/11/25 05:58:47 by bmerchin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,4 +48,27 @@ void	shq_s_c(t_struct *data)
 		i++;
 	}
 	shq_s_c2(data, i, j);
+}
+
+void	hq_s_c(t_struct *data)
+{
+	char c[2];
+
+	if (data->str[data->i] == 's')
+		data->s = va_arg(data->args, char *);
+	if (data->str[data->i] == 'c')
+	{
+		c[0] = va_arg(data->args, int);
+		c[1] = '\0';
+		data->s = c;
+	}
+	if (data->str[data->i] == '%')
+	{
+		c[0] = '%';
+		c[1] = '\0';
+		data->s = c;
+	}
+	if (data->f_neg)
+		data->f_zero = ' ';
+	shq_s_c(data);
 }
