@@ -15,17 +15,13 @@ int		main(int ac, char **av)
 	a = 10;
 	(void)ac;
 	(void)av;
-	ft_printf("%d", 5);
-	printf("\n-----------------------\n");
-	printf("%d", 5);
-	printf("\n");
 
 
 
-/*	ft_printf(av[4], atoi(av[1]), av[2], &a + 10);
+	ft_printf(av[4], atoi(av[1]), av[2], &a + 10);
 	printf("\n-----------------------\n");
 	printf(av[4], atoi(av[1]), av[2], &a + 10);
-	printf("\n");*/
+	printf("\n");
 
 
 
